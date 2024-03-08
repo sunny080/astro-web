@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@astrojs/tailwind": "^5.1.0",
+    "@portabletext/toolkit": "^2.0.10",
     "@sanity/client": "^6.15.3",
     "astro": "^4.4.15",
     "astro-portabletext": "^0.9.6",
