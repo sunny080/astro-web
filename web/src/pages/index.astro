@@ -1,0 +1,30 @@
+---
+import { useSanityClient } from "astro-sanity";
+import { UrlForImage } from "../lib/api";
+
+const posts = await useSanityClient().fetch(`*[_type == "post"]`);
+---
+
+<div
+  class="max-w-[1440px] mx-auto px-4 lg:px-20 xl:px-[120px] py-20 lg:py-[120px]"
+>
+  <h3 class="text-5xl mb-6 font-semibold font-sans text-gray-950 text-center">
+    All Blogs
+  </h3>
+  <div class="grid grid-cols-3 gap-4">
+    {
+      posts.map((node) => {
+        return (
+          <a href={`/blog/${node.slug.current}`} class="">
+            <img
+              src={UrlForImage(node.mainImage).url()}
+              alt="frame"
+              class=" w-full h-[300px]"
+            />
+            <p class="text-base font-normal mt-4">{node.title}</p>
+          </a>
+        );
+      })
+    }
+  </div>
+</div>

@@ -1,0 +1,90 @@
+---
+import { UrlForImage } from "../../lib/api";
+import { PortableText } from "astro-portabletext";
+import Layout from "../../layouts/Layout.astro";
+import { useSanityClient, groq } from "astro-sanity";
+
+interface Props {
+  post: {
+    title: string;
+    mainImage: string;
+    author: {
+      name: string;
+      image: string;
+    };
+    body?: {
+      _type: string;
+      style: string;
+      listItem?: string | undefined;
+      children: {
+        text: string;
+      }[];
+    }[];
+  };
+}
+export async function getStaticPaths() {
+  const query = groq`*[_type == "post"]{
+   title,
+   mainImage{
+   _type,
+   asset{_ref,_type}
+  },
+  slug,
+    author->{
+    name,
+      "slug":slug.current,
+      image{
+   _type,
+   asset{_ref,_type}
+  },
+  bio
+    },
+categories[]->{
+  title,
+  description,
+},
+  publishedAt,
+  body
+  
+}`;
+  const sanityClient = useSanityClient();
+  const firstPost = await sanityClient.fetch(query);
+
+  return firstPost.map((post: { slug: { current: any } }) => ({
+    params: {
+      slug: post.slug.current,
+    },
+    props: {
+      post,
+    },
+  }));
+}
+
+const { post } = Astro.props;
+---
+
+<Layout title={post.title}>
+  <div
+    class="max-w-[1440px] mx-auto w-full px-4 lg:px-20 xl:px-[120] my-20 lg:my-[120px]"
+  >
+    <h3 class="text-5xl mb-6 font-semibold font-sans text-gray-950">
+      {post?.title}
+    </h3>
+    <div class="flex items-center gap-4">
+      <img
+        src={UrlForImage(post.author?.image).url()}
+        alt="author"
+        class="w-10 h-10 rounded-full"
+      />
+      <div class="flex flex-col gap-1">
+        <p class="font-normal text-gray-700 font-base">{post?.author?.name}</p>
+      </div>
+    </div>
+    <img
+      src={UrlForImage(post.mainImage).url()}
+      alt="frame"
+      class="max-h-[500px] w-full"
+    />
+    {post.body && <PortableText value={post.body} />}
+  </div>
+</Layout>
